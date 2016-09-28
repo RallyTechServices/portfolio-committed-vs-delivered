@@ -3,12 +3,12 @@
 <head>
     <title>Portfolio Committed vs Delivered</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Wed Sep 28 2016 12:41:01 GMT-0600 (MDT) -->
+    <!--  Build Date: Wed Sep 28 2016 13:08:15 GMT-0600 (MDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Sep 28 2016 12:41:01 GMT-0600 (MDT)";
+        var APP_BUILD_DATE = "Wed Sep 28 2016 13:08:15 GMT-0600 (MDT)";
         var BUILDER = "kcorkan";
-        var CHECKSUM = 17521704502;
+        var CHECKSUM = 17565816757;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -605,7 +605,8 @@ Ext.define("portfolio-committed-vs-delivered", {
             model: this.portfolioItemTypePaths[1],
             fetch: ['FormattedID','Name','ObjectID'],
             filters: filters,
-            limit: 'Infinity'
+            limit: 'Infinity',
+            context: {project: null}
         }).load({
             callback: function(records, operation){
                 if (operation.wasSuccessful()){

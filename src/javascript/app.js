@@ -400,7 +400,8 @@ Ext.define("portfolio-committed-vs-delivered", {
             model: this.portfolioItemTypePaths[1],
             fetch: ['FormattedID','Name','ObjectID'],
             filters: filters,
-            limit: 'Infinity'
+            limit: 'Infinity',
+            context: {project: null}
         }).load({
             callback: function(records, operation){
                 if (operation.wasSuccessful()){
