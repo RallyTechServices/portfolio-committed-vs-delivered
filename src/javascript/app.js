@@ -144,7 +144,7 @@ Ext.define("portfolio-committed-vs-delivered", {
     initializeApp: function(){
         this.getSelectorBox().add({
             xtype: 'rallydatefield',
-            fieldLabel: 'Commit Date',
+            fieldLabel: 'Date 1',
             itemId: 'commitDate',
             labelAlign: 'right',
             stateful: true,
@@ -157,7 +157,7 @@ Ext.define("portfolio-committed-vs-delivered", {
 
         this.getSelectorBox().add({
             xtype: 'rallydatefield',
-            fieldLabel: 'Delivered Date',
+            fieldLabel: 'Date 2',
             itemId: 'deliveredDate',
             stateful: true,
             stateId: 'delivered-date',

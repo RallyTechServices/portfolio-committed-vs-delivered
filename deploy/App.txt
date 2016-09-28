@@ -3,12 +3,12 @@
 <head>
     <title>Portfolio Committed vs Delivered</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Wed Sep 28 2016 11:05:35 GMT-0600 (MDT) -->
+    <!--  Build Date: Wed Sep 28 2016 11:42:18 GMT-0600 (MDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Sep 28 2016 11:05:35 GMT-0600 (MDT)";
+        var APP_BUILD_DATE = "Wed Sep 28 2016 11:42:18 GMT-0600 (MDT)";
         var BUILDER = "kcorkan";
-        var CHECKSUM = 17290510728;
+        var CHECKSUM = 17265764176;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -349,7 +349,7 @@ Ext.define("portfolio-committed-vs-delivered", {
     initializeApp: function(){
         this.getSelectorBox().add({
             xtype: 'rallydatefield',
-            fieldLabel: 'Commit Date',
+            fieldLabel: 'Date 1',
             itemId: 'commitDate',
             labelAlign: 'right',
             stateful: true,
@@ -362,7 +362,7 @@ Ext.define("portfolio-committed-vs-delivered", {
 
         this.getSelectorBox().add({
             xtype: 'rallydatefield',
-            fieldLabel: 'Delivered Date',
+            fieldLabel: 'Date 2',
             itemId: 'deliveredDate',
             stateful: true,
             stateId: 'delivered-date',
