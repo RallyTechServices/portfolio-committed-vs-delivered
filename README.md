@@ -34,7 +34,7 @@ By default, this chart shows all "Initiatives" that have "Features" in the selec
 
 
 ## App Settings
-![ScreenShot](/images/portfolio-committed-vs-delivered-settings/png)
+![ScreenShot](/images/portfolio-commited-vs-delivered-settings.png)
 
 ###Portfolio Complete State
 The portfolio item state that should be considered "Complete" and will determine if a portoflio item is included in the "Delivered" count above.  
