@@ -3,12 +3,12 @@
 <head>
     <title>Portfolio Committed vs Delivered</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Wed Sep 28 2016 11:44:11 GMT-0600 (MDT) -->
+    <!--  Build Date: Wed Sep 28 2016 12:41:01 GMT-0600 (MDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Sep 28 2016 11:44:11 GMT-0600 (MDT)";
+        var APP_BUILD_DATE = "Wed Sep 28 2016 12:41:01 GMT-0600 (MDT)";
         var BUILDER = "kcorkan";
-        var CHECKSUM = 17265762239;
+        var CHECKSUM = 17521704502;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -490,6 +490,8 @@ Ext.define("portfolio-committed-vs-delivered", {
             this.showAppMessage(this.DATE_MISSING_MSG);
             return;
         }
+
+        this.setLoading(true);
         this.fetchReleases(timeboxScope);
 
     },
@@ -546,12 +548,11 @@ Ext.define("portfolio-committed-vs-delivered", {
             promises.push(this.fetchFeatureSnapshots(releaseIds, this.getDeliveredDate()));
         }
 
-
         Deft.Promise.all(promises).then({
             success: this.buildChart,
             failure: this.showErrorNotification,
             scope: this
-        });
+        }).always(function(){ this.setLoading(false);},this);
 
     },
     fetchFeatureSnapshots: function(releaseIds, asOfDate){
@@ -599,7 +600,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             filters = Ext.Array.map(initiatives, function(i){ return {property: 'ObjectID', value: i }; });
             filters = Rally.data.wsapi.Filter.or(filters);
         }
-
+        this.setLoading(true);
         Ext.create('Rally.data.wsapi.Store',{
             model: this.portfolioItemTypePaths[1],
             fetch: ['FormattedID','Name','ObjectID'],
@@ -621,7 +622,7 @@ Ext.define("portfolio-committed-vs-delivered", {
                 }
             },
             scope: this
-        });
+        }).always(function(){ this.setLoading(false);},this);
         return deferred;
     },
     buildChart: function(featureSnapshots){

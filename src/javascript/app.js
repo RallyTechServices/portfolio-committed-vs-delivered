@@ -285,6 +285,8 @@ Ext.define("portfolio-committed-vs-delivered", {
             this.showAppMessage(this.DATE_MISSING_MSG);
             return;
         }
+
+        this.setLoading(true);
         this.fetchReleases(timeboxScope);
 
     },
@@ -341,12 +343,11 @@ Ext.define("portfolio-committed-vs-delivered", {
             promises.push(this.fetchFeatureSnapshots(releaseIds, this.getDeliveredDate()));
         }
 
-
         Deft.Promise.all(promises).then({
             success: this.buildChart,
             failure: this.showErrorNotification,
             scope: this
-        });
+        }).always(function(){ this.setLoading(false);},this);
 
     },
     fetchFeatureSnapshots: function(releaseIds, asOfDate){
@@ -394,7 +395,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             filters = Ext.Array.map(initiatives, function(i){ return {property: 'ObjectID', value: i }; });
             filters = Rally.data.wsapi.Filter.or(filters);
         }
-
+        this.setLoading(true);
         Ext.create('Rally.data.wsapi.Store',{
             model: this.portfolioItemTypePaths[1],
             fetch: ['FormattedID','Name','ObjectID'],
@@ -416,7 +417,7 @@ Ext.define("portfolio-committed-vs-delivered", {
                 }
             },
             scope: this
-        });
+        }).always(function(){ this.setLoading(false);},this);
         return deferred;
     },
     buildChart: function(featureSnapshots){
