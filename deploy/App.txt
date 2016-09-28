@@ -3,12 +3,12 @@
 <head>
     <title>Portfolio Committed vs Delivered</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Wed Sep 28 2016 13:08:15 GMT-0600 (MDT) -->
+    <!--  Build Date: Wed Sep 28 2016 14:02:23 GMT-0600 (MDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Sep 28 2016 13:08:15 GMT-0600 (MDT)";
+        var APP_BUILD_DATE = "Wed Sep 28 2016 14:02:23 GMT-0600 (MDT)";
         var BUILDER = "kcorkan";
-        var CHECKSUM = 17565816757;
+        var CHECKSUM = 18913196745;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -224,7 +224,8 @@ Ext.define("portfolio-committed-vs-delivered", {
     config: {
         defaultSettings: {
             featureDoneState: 'GA',
-            featureBlockedField: ''
+            featureBlockedField: '',
+            portfolioTargetLevel: 2
         }
     },
 
@@ -396,6 +397,13 @@ Ext.define("portfolio-committed-vs-delivered", {
         clearBtn.setVisible(buttonCls === 'primary');
 
     },
+    getTargetPortfolioLevel: function(){
+        var target = this.getSetting('portfolioTargetLevel');
+        if (target && target < this.portfolioItemTypePaths.length - 1){
+            return target;
+        }
+        return this.portfolioItemTypePaths.length - 1;
+    },
     getState: function(){
         var state = {};
         if (this.initiativeHash){
@@ -416,7 +424,7 @@ Ext.define("portfolio-committed-vs-delivered", {
 
     getSelectedPortfolioItems: function(){
         var ids = Ext.Object.getKeys(this.getInitiativeHash()),
-            portfolioItemPath = this.portfolioItemTypePaths[1].toLowerCase();
+            portfolioItemPath = this.portfolioItemTypePaths[this.getTargetPortfolioLevel()].toLowerCase();
         return Ext.Array.map(ids, function(id){ return Ext.String.format('/{0}/{1}', portfolioItemPath, id); });
     },
     selectPortfolioItems: function(){
@@ -426,7 +434,7 @@ Ext.define("portfolio-committed-vs-delivered", {
 
         this.logger.log('selectPortfolioItems',thisHeight, this.height);
         Ext.create('Rally.ui.dialog.ArtifactChooserDialog', {
-            artifactTypes: [this.portfolioItemTypePaths[1]],
+            artifactTypes: [this.portfolioItemTypePaths[this.getTargetPortfolioLevel()]],
             autoShow: true,
             height: thisHeight,
             multiple: true,
@@ -558,7 +566,7 @@ Ext.define("portfolio-committed-vs-delivered", {
     fetchFeatureSnapshots: function(releaseIds, asOfDate){
         var deferred = Ext.create('Deft.Deferred');
 
-        var fetch = ['ObjectID','Parent','State'];
+        var fetch = ['ObjectID','Parent','State','_ItemHierarchy'];
         if (this.getSetting('featureBlockedField')){
             fetch.push(this.getSetting('featureBlockedField'));
         }
@@ -572,7 +580,8 @@ Ext.define("portfolio-committed-vs-delivered", {
 
         var portfolioItems = Ext.Array.map(Ext.Object.getKeys(this.getInitiativeHash()), function(k){ return Number(k); });
         if (portfolioItems && portfolioItems.length > 0){
-             find.Parent = {$in: portfolioItems}
+             //find.Parent = {$in: portfolioItems}
+            find._ItemHierarchy = {$in: portfolioItems}
         }
         this.logger.log('fetchFeatureSnapshots selected portfolio items', this.getInitiativeHash(), portfolioItems, find);
 
@@ -602,7 +611,7 @@ Ext.define("portfolio-committed-vs-delivered", {
         }
         this.setLoading(true);
         Ext.create('Rally.data.wsapi.Store',{
-            model: this.portfolioItemTypePaths[1],
+            model: this.portfolioItemTypePaths[this.getTargetPortfolioLevel()],
             fetch: ['FormattedID','Name','ObjectID'],
             filters: filters,
             limit: 'Infinity',
@@ -827,10 +836,20 @@ Ext.define("portfolio-committed-vs-delivered", {
     },
     populateInitiativeHash: function(hash, snapshots, category){
         this.logger.log('populateInitiativeHash', hash, snapshots, category);
+        var piOffset = this.getTargetPortfolioLevel();
 
         for (var i=0; i<snapshots.length; i++){
             var snap = snapshots[i].getData(),
-                initiative = snap.Parent || 'none';
+                itemHierarchy = snap._ItemHierarchy,
+                initiative = 'none';
+                //initiative = snap.Parent || 'none';
+
+            if (piOffset < itemHierarchy.length){
+                var initiativeIdx = itemHierarchy.length - 1 - piOffset;
+                initiative = itemHierarchy[initiativeIdx];
+            }
+            console.log('itemHierarchy', itemHierarchy, initiative, snap.ObjectID);
+            //itemHierarchy Array [ 45976979662, 45976979372, 44772028590, 57379683523 ] 57379683523
             if (initiative){
                 if (!hash[initiative]){
                     hash[initiative] = {};
