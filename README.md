@@ -45,6 +45,21 @@ The boolean field that determines if a Portfolio Item is blocked.
 
 ## Development Notes
 
+###Changing the Portfolio Item level for the chart and selection.
+If you want to use second level portfolio items instead of third level, then update the defaultSettings in the config section of the extended app.  This could be added as a setting.  
+
+In lines 19-25 of the app.js file is where the default settings are defined:
+```javascript
+    config: {
+        defaultSettings: {
+            featureDoneState: 'GA',
+            featureBlockedField: '',
+            portfolioTargetLevel: 2
+        }
+    }
+```
+
+
 ### First Load
 
 If you've just downloaded this from github and you want to do development, 
