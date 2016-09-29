@@ -472,7 +472,8 @@ Ext.define("portfolio-committed-vs-delivered", {
         this.logger.log('addChart', initiativeHash);
         this.getDisplayBox().add({
             xtype: 'rallychart',
-            chartColors: ['#FAD200','#005EB8','#8DC63F','#3a874f','#EE1C25','#B81B10'],
+            //chartColors: ['#FAD200','#005EB8','#8DC63F','#3a874f','#EE1C25','#B81B10'],
+            chartColors: ['#FAD200','#005EB8','#8DC63F','#EE1C25','#3a874f','#B81B10'],
             chartConfig: this.getChartConfig(initiativeHash),
             chartData: this.getChartData(initiativeHash)
         });
@@ -613,19 +614,19 @@ Ext.define("portfolio-committed-vs-delivered", {
                 data: delivered,
                 stack: 'Delivered'
             },{
-                name: 'Added (Blocked)',
-                data: blockedAdded
-            },{
                 name: 'Added',
                 data: added
-            },{
-                name: 'Not Completed (Blocked)',
-                data: blocked,
-                stack: 'notComplete'
             },{
                 name: 'Not Completed',
                 data: notCompleted,
                 stack: 'notComplete'
+            //},{
+            //    name: 'Added (Blocked)',
+            //    data: blockedAdded
+            //},{
+            //    name: 'Not Completed (Blocked)',
+            //    data: blocked,
+            //    stack: 'notComplete'
             }]
         };
     },
@@ -670,16 +671,16 @@ Ext.define("portfolio-committed-vs-delivered", {
             labelWidth: labelWidth,
             valueField: 'name',
             value: this.getSetting('featureDoneState')
-        },{
-            xtype: 'rallyfieldcombobox',
-            model: this.portfolioItemTypePaths[0],
-            name: 'featureBlockedField',
-            fieldLabel: 'Portfolio Blocked Field',
-            labelAlign: 'right',
-            labelWidth: labelWidth,
-            _isNotHidden: function(field) {
-                return !field.hidden && field.attributeDefinition && field.attributeDefinition.AttributeType.toUpperCase() === "BOOLEAN";
-            }
+        //},{
+        //    xtype: 'rallyfieldcombobox',
+        //    model: this.portfolioItemTypePaths[0],
+        //    name: 'featureBlockedField',
+        //    fieldLabel: 'Portfolio Blocked Field',
+        //    labelAlign: 'right',
+        //    labelWidth: labelWidth,
+        //    _isNotHidden: function(field) {
+        //        return !field.hidden && field.attributeDefinition && field.attributeDefinition.AttributeType.toUpperCase() === "BOOLEAN";
+        //    }
         }];
     },
     getOptions: function() {

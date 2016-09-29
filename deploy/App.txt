@@ -3,12 +3,12 @@
 <head>
     <title>Portfolio Committed vs Delivered</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Wed Sep 28 2016 14:02:23 GMT-0600 (MDT) -->
+    <!--  Build Date: Thu Sep 29 2016 09:53:03 GMT-0600 (MDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Wed Sep 28 2016 14:02:23 GMT-0600 (MDT)";
+        var APP_BUILD_DATE = "Thu Sep 29 2016 09:53:03 GMT-0600 (MDT)";
         var BUILDER = "kcorkan";
-        var CHECKSUM = 18913196745;
+        var CHECKSUM = 18922818201;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -677,7 +677,8 @@ Ext.define("portfolio-committed-vs-delivered", {
         this.logger.log('addChart', initiativeHash);
         this.getDisplayBox().add({
             xtype: 'rallychart',
-            chartColors: ['#FAD200','#005EB8','#8DC63F','#3a874f','#EE1C25','#B81B10'],
+            //chartColors: ['#FAD200','#005EB8','#8DC63F','#3a874f','#EE1C25','#B81B10'],
+            chartColors: ['#FAD200','#005EB8','#8DC63F','#EE1C25','#3a874f','#B81B10'],
             chartConfig: this.getChartConfig(initiativeHash),
             chartData: this.getChartData(initiativeHash)
         });
@@ -818,19 +819,19 @@ Ext.define("portfolio-committed-vs-delivered", {
                 data: delivered,
                 stack: 'Delivered'
             },{
-                name: 'Added (Blocked)',
-                data: blockedAdded
-            },{
                 name: 'Added',
                 data: added
-            },{
-                name: 'Not Completed (Blocked)',
-                data: blocked,
-                stack: 'notComplete'
             },{
                 name: 'Not Completed',
                 data: notCompleted,
                 stack: 'notComplete'
+            //},{
+            //    name: 'Added (Blocked)',
+            //    data: blockedAdded
+            //},{
+            //    name: 'Not Completed (Blocked)',
+            //    data: blocked,
+            //    stack: 'notComplete'
             }]
         };
     },
@@ -848,7 +849,6 @@ Ext.define("portfolio-committed-vs-delivered", {
                 var initiativeIdx = itemHierarchy.length - 1 - piOffset;
                 initiative = itemHierarchy[initiativeIdx];
             }
-            console.log('itemHierarchy', itemHierarchy, initiative, snap.ObjectID);
             //itemHierarchy Array [ 45976979662, 45976979372, 44772028590, 57379683523 ] 57379683523
             if (initiative){
                 if (!hash[initiative]){
@@ -876,16 +876,16 @@ Ext.define("portfolio-committed-vs-delivered", {
             labelWidth: labelWidth,
             valueField: 'name',
             value: this.getSetting('featureDoneState')
-        },{
-            xtype: 'rallyfieldcombobox',
-            model: this.portfolioItemTypePaths[0],
-            name: 'featureBlockedField',
-            fieldLabel: 'Portfolio Blocked Field',
-            labelAlign: 'right',
-            labelWidth: labelWidth,
-            _isNotHidden: function(field) {
-                return !field.hidden && field.attributeDefinition && field.attributeDefinition.AttributeType.toUpperCase() === "BOOLEAN";
-            }
+        //},{
+        //    xtype: 'rallyfieldcombobox',
+        //    model: this.portfolioItemTypePaths[0],
+        //    name: 'featureBlockedField',
+        //    fieldLabel: 'Portfolio Blocked Field',
+        //    labelAlign: 'right',
+        //    labelWidth: labelWidth,
+        //    _isNotHidden: function(field) {
+        //        return !field.hidden && field.attributeDefinition && field.attributeDefinition.AttributeType.toUpperCase() === "BOOLEAN";
+        //    }
         }];
     },
     getOptions: function() {

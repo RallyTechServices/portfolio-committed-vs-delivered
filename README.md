@@ -11,23 +11,23 @@ This app is based on portfolio item type level and will work regardless of wheth
 ###Committed
 "Features" items associated with the selected Release and "Themes" on Date 1 are represented in the chart as "Committed" (Yellow)
 
-The remaining bars (Delivered, Added, Added (Blocked), Not Complete, Not Complete (Blocked) represent the First level portfolio items associated with the selected Release and third level portfolio items on "date 2".  
+The remaining bars (Delivered, Added,Not Complete, represent the First level portfolio items associated with the selected Release and third level portfolio items on "date 2".  
 ###Delivered
 These are "Features" that were in the Portfolio Item "Complete" state (as configured in the app settings) on Date 2.  
 "Features" that were committed on "Date1" and in a state of "Complete" are included in this count as well as items that are in a state of "Done" but were added to the Release or "Theme" after "Date1"
 
 ###Not Complete
 This count includes "Features" that were associated with the selected Release and "Theme" on "Date 1" but were not in a "Complete" state on "Date 2".  
-
+<!---
 ###Not Complete (Blocked)
 This count includes "Features" that belong to the above "Not Complete" category but were in a state of "Blocked" (as configured in App settings) on "Date 2".
-
+-->
 ###Added 
 This count includes "Features" that were NOT associated with the selected Release and "Theme" on "Date 1" and were also not in a "Complete" state on "Date 2".  
-
+<!---
 ###Added (Blocked)
 This count includes "Features" that belong to the above "Added" category but are also in a state of "Blocked" (as configured in App Settings) on "Date 2".
-
+-->
 ![ScreenShot](/images/select-portfolio-items.png) To see the chart for only selected "Themes", select one or more "Themes" using the "Select Portfolio Items" button.
 To see all data for all "Themes" that have "Features" in the selected release, click the "Clear All" button.  
 By default, this chart shows all "Themes" that have "Features" in the selected Release.  
@@ -39,22 +39,23 @@ By default, this chart shows all "Themes" that have "Features" in the selected R
 ###Portfolio Complete State
 The portfolio item state that should be considered "Complete" and will determine if a portfolio item is included in the "Delivered" count above.  
 
+<!---
 ###Portfolio Blocked Field
 The boolean field that determines if a Portfolio Item is blocked.  
-
+-->
 
 ## Development Notes
 
 ###Changing the Portfolio Item level for the chart and selection.
-If you want to use second level portfolio items instead of third level, then update the defaultSettings in the config section of the extended app.  This could be added as a setting.  
+If you want to use second level portfolio items instead of third level, then update the defaultSettings in the config section of the extended app to be the index of the portofolio item level that you wish to target (e.g. For example, for the default Portfolio hierarchy, Feature = 0, Initiative = 1, Theme = 2, etc.).  This could also be added as a setting.  
 
-In lines 19-25 of the app.js file is where the default settings are defined:
+Default settings are defined in lines 19-25 of the app.js file:
 ```javascript
     config: {
         defaultSettings: {
-            featureDoneState: 'GA',
-            featureBlockedField: '',
-            portfolioTargetLevel: 2
+            featureDoneState: 'Done',                 //Can be set through App Settings UI
+            featureBlockedField: 'c_Blocked',         //Can be set through App Settings UI
+            portfolioTargetLevel: 2                   //Not currently in App Settings UI, but could be added to getFieldSettings method
         }
     }
 ```
