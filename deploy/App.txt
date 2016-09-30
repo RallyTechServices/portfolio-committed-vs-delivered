@@ -3,12 +3,12 @@
 <head>
     <title>Portfolio Committed vs Delivered</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Thu Sep 29 2016 21:01:12 GMT-0600 (MDT) -->
+    <!--  Build Date: Thu Sep 29 2016 21:05:35 GMT-0600 (MDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Sep 29 2016 21:01:12 GMT-0600 (MDT)";
+        var APP_BUILD_DATE = "Thu Sep 29 2016 21:05:35 GMT-0600 (MDT)";
         var BUILDER = "kcorkan";
-        var CHECKSUM = 20472335404;
+        var CHECKSUM = 20488159389;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -412,7 +412,7 @@ Ext.define("portfolio-committed-vs-delivered", {
                 iconCls: 'icon-portfolio',
                 cls: 'rly-small ' + buttonCls,
                 margin: '0 0 0 5',
-                tooltip: "Select Portfolio Items"
+                toolTipText: "Select Portfolio Items"
             });
             button.on('click', this.selectPortfolioItems, this);
 
@@ -422,7 +422,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             text: 'Clear All',
             cls: 'rly-small secondary',
             visible: false,
-            tooltip: "Clear all portfolio item selections"
+            toolTipText: "Clear all portfolio item selections"
         });
         clearBtn.on('click',this.updateSelectedPortfolioItems, this);
         this.logger.log('buttonCls', buttonCls);

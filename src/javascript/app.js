@@ -207,7 +207,7 @@ Ext.define("portfolio-committed-vs-delivered", {
                 iconCls: 'icon-portfolio',
                 cls: 'rly-small ' + buttonCls,
                 margin: '0 0 0 5',
-                tooltip: "Select Portfolio Items"
+                toolTipText: "Select Portfolio Items"
             });
             button.on('click', this.selectPortfolioItems, this);
 
@@ -217,7 +217,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             text: 'Clear All',
             cls: 'rly-small secondary',
             visible: false,
-            tooltip: "Clear all portfolio item selections"
+            toolTipText: "Clear all portfolio item selections"
         });
         clearBtn.on('click',this.updateSelectedPortfolioItems, this);
         this.logger.log('buttonCls', buttonCls);
