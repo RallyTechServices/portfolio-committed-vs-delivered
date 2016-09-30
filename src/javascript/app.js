@@ -18,12 +18,12 @@ Ext.define("portfolio-committed-vs-delivered", {
 
     config: {
         defaultSettings: {
-            featureDoneState: 'GA',
+            featureDoneState: 'Accepted',
             featureBlockedField: '',
             portfolioTargetLevel: 2
         }
     },
-
+    portfolioItemStates: null,
     portfolioItemTypePaths: null,
 
     launch: function() {
@@ -43,6 +43,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             }
         }
 
+
         this.fetchPortfolioItemTypes().then({
             success: function(types){
                 this.portfolioItemTypePaths = types;
@@ -53,6 +54,29 @@ Ext.define("portfolio-committed-vs-delivered", {
             scope: this
         });
 
+    },
+    fetchPortfolioStates: function(types){
+        this.portfolioItemTypePaths = types;
+        var deferred = Ext.create('Deft.Deferred');
+
+        Rally.data.ModelFactory.getModel({
+            type: types[0],
+            success: function(model) {
+                model.getField('State').getAllowedValueStore().load({
+                    callback: function(records, operation, success) {
+                        var states = [];
+                        Ext.Array.each(records, function(allowedValue) {
+                            //each record is an instance of the AllowedAttributeValue model
+                            states.push(allowedValue.get('StringValue'));
+                        });
+                        console.log('states',states);
+                        deferred.resolve(states);
+                    }
+                });
+            }
+        });
+
+        return deferred;
     },
     fetchPortfolioItemTypes: function(){
         var deferred = Ext.create('Deft.Deferred');
@@ -118,7 +142,11 @@ Ext.define("portfolio-committed-vs-delivered", {
         if(timeboxScope && timeboxScope.getType() === 'release') {
             this.getContext().setTimeboxScope(timeboxScope);
             if (timeboxScope.getRecord()){
-                this.down('#commitDate').setValue(Rally.util.DateTime.add(timeboxScope.getRecord().get('ReleaseStartDate'),'week',3));
+                var commitDate = Rally.util.DateTime.add(timeboxScope.getRecord().get('ReleaseStartDate'),'week',3);
+                if ( commitDate > new Date()){
+                    commitDate = new Date();
+                }
+                this.down('#commitDate').setValue(commitDate);
                 this.down('#deliveredDate').setValue(new Date());
             }
             this.updateView();
@@ -150,6 +178,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             labelAlign: 'right',
             stateful: true,
             stateId: 'commit-date',
+            maxValue: new Date(),
             listeners: {
                 select: this.updateView,
                 scope: this
@@ -163,6 +192,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             stateful: true,
             stateId: 'delivered-date',
             labelAlign: 'right',
+            maxValue: new Date(),
             listeners: {
                 select: this.updateView,
                 scope: this
@@ -176,7 +206,8 @@ Ext.define("portfolio-committed-vs-delivered", {
                 itemId: 'selectPI',
                 iconCls: 'icon-portfolio',
                 cls: 'rly-small ' + buttonCls,
-                margin: '0 0 0 5'
+                margin: '0 0 0 5',
+                tooltip: "Select Portfolio Items"
             });
             button.on('click', this.selectPortfolioItems, this);
 
@@ -185,7 +216,8 @@ Ext.define("portfolio-committed-vs-delivered", {
             itemId: 'clearPI',
             text: 'Clear All',
             cls: 'rly-small secondary',
-            visible: false
+            visible: false,
+            tooltip: "Clear all portfolio item selections"
         });
         clearBtn.on('click',this.updateSelectedPortfolioItems, this);
         this.logger.log('buttonCls', buttonCls);
@@ -369,7 +401,8 @@ Ext.define("portfolio-committed-vs-delivered", {
         var find = {
             _TypeHierarchy: this.portfolioItemTypePaths[0],
             Release: {$in: releaseIds},
-            __At: asOfDate
+            __At: asOfDate,
+            _ProjectHierarchy: this.getContext().getProject().ObjectID
         };
 
 
@@ -576,6 +609,9 @@ Ext.define("portfolio-committed-vs-delivered", {
                 blockedAddedCount = 0;
 
             Ext.Array.each(types.delivered, function(d){
+                if (!Ext.Array.contains(committedOids, d.ObjectID)){
+                    addedCount++;
+                }
                 if (featureBlockedField && d[featureBlockedField] === true){
                     if (!Ext.Array.contains(committedOids, d.ObjectID)) {
                         this.logger.log('blocked and added not committed', d.ObjectID)
@@ -586,12 +622,7 @@ Ext.define("portfolio-committed-vs-delivered", {
                 } else if (d.State === featureDoneState){
                     done++;
                 } else {
-                    if (!Ext.Array.contains(committedOids, d.ObjectID)){
-                        this.logger.log('added not committed', d.ObjectID)
-                        addedCount++;
-                    } else {
-                        notDone++;
-                    }
+                    notDone++;
                 }
             }, this);
             this.logger.log('---- END Initiative id=', id)
@@ -610,14 +641,14 @@ Ext.define("portfolio-committed-vs-delivered", {
                 data: committed,
                 stack: 'Committed'
             },{
-                name: 'Completed',
+                name: this.getFeatureDoneState(),
                 data: delivered,
                 stack: 'Delivered'
             },{
                 name: 'Added',
                 data: added
             },{
-                name: 'Not Completed',
+                name: 'Not ' + this.getFeatureDoneState(),
                 data: notCompleted,
                 stack: 'notComplete'
             //},{
@@ -659,18 +690,20 @@ Ext.define("portfolio-committed-vs-delivered", {
     },
     getSettingsFields: function(){
 
-        var labelWidth = 150;
+        var labelWidth = 150,
+            me = this;
 
-        return [{
-            xtype: 'rallyfieldvaluecombobox',
-            model: this.portfolioItemTypePaths[0],
-            name: 'featureDoneState',
-            field: 'State',
-            fieldLabel: 'Portfolio Complete State',
-            labelAlign: 'right',
-            labelWidth: labelWidth,
-            valueField: 'name',
-            value: this.getSetting('featureDoneState')
+        return [];
+        //return [{
+        //    xtype: 'rallyfieldvaluecombobox',
+        //    model: this.portfolioItemTypePaths[0],
+        //    name: 'featureDoneState',
+        //    field: 'State',
+        //    fieldLabel: 'Portfolio Complete State',
+        //    labelAlign: 'right',
+        //    labelWidth: labelWidth,
+        //    valueField: 'Name'
+        //   // value: this.getSetting('featureDoneState')
         //},{
         //    xtype: 'rallyfieldcombobox',
         //    model: this.portfolioItemTypePaths[0],
@@ -681,7 +714,7 @@ Ext.define("portfolio-committed-vs-delivered", {
         //    _isNotHidden: function(field) {
         //        return !field.hidden && field.attributeDefinition && field.attributeDefinition.AttributeType.toUpperCase() === "BOOLEAN";
         //    }
-        }];
+        //}];
     },
     getOptions: function() {
         return [
