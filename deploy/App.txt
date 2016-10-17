@@ -3,12 +3,12 @@
 <head>
     <title>Portfolio Committed vs Delivered</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Thu Sep 29 2016 21:05:35 GMT-0600 (MDT) -->
+    <!--  Build Date: Mon Oct 17 2016 10:25:41 GMT-0600 (MDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Thu Sep 29 2016 21:05:35 GMT-0600 (MDT)";
+        var APP_BUILD_DATE = "Mon Oct 17 2016 10:25:41 GMT-0600 (MDT)";
         var BUILDER = "kcorkan";
-        var CHECKSUM = 20488159389;
+        var CHECKSUM = 20534649373;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -525,7 +525,8 @@ Ext.define("portfolio-committed-vs-delivered", {
         this.logger.log('updateView', commitDate, deliverDate, timeboxScope);
 
         this.getDisplayBox().removeAll();
-
+        this.initiativeHash = {};
+        
         if (!commitDate || !deliverDate){
             this.showAppMessage(this.DATE_MISSING_MSG);
             return;
