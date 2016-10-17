@@ -320,7 +320,8 @@ Ext.define("portfolio-committed-vs-delivered", {
         this.logger.log('updateView', commitDate, deliverDate, timeboxScope);
 
         this.getDisplayBox().removeAll();
-
+        this.initiativeHash = {};
+        
         if (!commitDate || !deliverDate){
             this.showAppMessage(this.DATE_MISSING_MSG);
             return;
