@@ -15,7 +15,6 @@ Ext.define("portfolio-committed-vs-delivered", {
     integrationHeaders : {
         name : "portfolio-committed-vs-delivered"
     },
-
     config: {
         defaultSettings: {
             featureDoneState: 'Accepted',
@@ -321,7 +320,7 @@ Ext.define("portfolio-committed-vs-delivered", {
 
         this.getDisplayBox().removeAll();
         this.initiativeHash = {};
-        
+
         if (!commitDate || !deliverDate){
             this.showAppMessage(this.DATE_MISSING_MSG);
             return;
@@ -497,16 +496,11 @@ Ext.define("portfolio-committed-vs-delivered", {
         } else {
             this.addChart(this.getInitiativeHash());
         }
-
-
-
-
     },
     addChart: function(initiativeHash){
         this.logger.log('addChart', initiativeHash);
         this.getDisplayBox().add({
             xtype: 'rallychart',
-            //chartColors: ['#FAD200','#005EB8','#8DC63F','#3a874f','#EE1C25','#B81B10'],
             chartColors: ['#FAD200','#005EB8','#8DC63F','#EE1C25','#3a874f','#B81B10'],
             chartConfig: this.getChartConfig(initiativeHash),
             chartData: this.getChartData(initiativeHash)
@@ -589,6 +583,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             blocked = [],
             blockedAdded = [],
             notCompleted = [],
+            removedFeatures = [],
             featureDoneState = this.getFeatureDoneState(),
             featureBlockedField = this.getFeatureBlockedField();
 
@@ -600,7 +595,11 @@ Ext.define("portfolio-committed-vs-delivered", {
             } else {
                 categories.push(i);
             }
-            var committedOids = _.pluck(types.committed || [], 'ObjectID');
+            var committedOids = _.pluck(types.committed || [], 'ObjectID'),
+                deliveredOids = _.pluck(types.delivered || [], 'ObjectID');
+
+            var removed = Ext.Array.difference(committedOids, deliveredOids);
+
             this.logger.log('---- START Initiative id=', id, ', committed=', committedOids)
             committed.push(types.committed && types.committed.length || 0);
             var done = 0,
@@ -613,6 +612,7 @@ Ext.define("portfolio-committed-vs-delivered", {
                 if (!Ext.Array.contains(committedOids, d.ObjectID)){
                     addedCount++;
                 }
+
                 if (featureBlockedField && d[featureBlockedField] === true){
                     if (!Ext.Array.contains(committedOids, d.ObjectID)) {
                         this.logger.log('blocked and added not committed', d.ObjectID)
@@ -632,6 +632,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             blocked.push(blockedCount);
             blockedAdded.push(blockedAddedCount);
             notCompleted.push(notDone);
+            removedFeatures.push(removed.length);
             added.push(addedCount);
         }, this);
 
@@ -652,7 +653,12 @@ Ext.define("portfolio-committed-vs-delivered", {
                 name: 'Not ' + this.getFeatureDoneState(),
                 data: notCompleted,
                 stack: 'notComplete'
-            //},{
+            },{
+                name: 'Removed',
+                data: removedFeatures,
+                stack: 'removed'
+
+                //},{
             //    name: 'Added (Blocked)',
             //    data: blockedAdded
             //},{
@@ -688,6 +694,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             }
         }
         this.logger.log('populateInitiativeHash end', hash);
+
     },
     getSettingsFields: function(){
 
