@@ -3,10 +3,10 @@
 <head>
     <title>Portfolio Committed vs Delivered</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Mon Oct 17 2016 10:25:42 GMT-0600 (MDT) -->
+    <!--  Build Date: Tue Jan 10 2017 10:24:22 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Mon Oct 17 2016 10:25:42 GMT-0600 (MDT)";
+        var APP_BUILD_DATE = "Tue Jan 10 2017 10:24:22 GMT-0700 (MST)";
         var CHECKSUM = [%= checksum %];
     </script>
     
