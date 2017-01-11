@@ -266,6 +266,10 @@ Ext.define("portfolio-committed-vs-delivered", {
             multiple: true,
             title: 'Choose Portfolio Item(s)',
             selectedRecords: selectedRecords,
+            _isArtifactEditable: function(record) {
+                return true;
+             //   return Rally.environment.getContext().getPermissions().isProjectEditor(record.get('Project'));
+            },
             storeConfig: {
                 filters: [{
                     property: 'Children.ObjectID',
@@ -296,11 +300,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             this.down('#clearPI').setVisible(false);
         }
 
-        this.initiativeHash = {};
-        Ext.Array.each(portfolioItems || [], function(p){
-            this.initiativeHash[p.get('ObjectID')] = {info:  p.getData()};
-        }, this);
-
+        this.selectedPortfolioItems = portfolioItems;
 
         this.saveState();
         this.updateView();
@@ -311,6 +311,14 @@ Ext.define("portfolio-committed-vs-delivered", {
         }
         return this.initiativeHash;
     },
+    initializeInitiativeHash: function(){
+        this.initiativeHash = {};
+        if (this.selectedPortfolioItems && this.selectedPortfolioItems.length > 0){
+            Ext.Array.each(this.selectedPortfolioItems || [], function(p){
+                this.initiativeHash[p.get('ObjectID')] = {info:  p.getData()};
+            }, this);
+        }
+    },
     updateView: function(){
         var commitDate = this.getCommitDate(),
             deliverDate = this.getDeliveredDate(),
@@ -319,8 +327,9 @@ Ext.define("portfolio-committed-vs-delivered", {
         this.logger.log('updateView', commitDate, deliverDate, timeboxScope);
 
         this.getDisplayBox().removeAll();
-        this.initiativeHash = {};
 
+        this.initializeInitiativeHash();
+        this.logger.log('initialized initiative hash', this.getInitiativeHash());
         if (!commitDate || !deliverDate){
             this.showAppMessage(this.DATE_MISSING_MSG);
             return;

@@ -3,12 +3,12 @@
 <head>
     <title>Portfolio Committed vs Delivered</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Tue Jan 10 2017 10:24:22 GMT-0700 (MST) -->
+    <!--  Build Date: Wed Jan 11 2017 13:42:50 GMT-0700 (MST) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Tue Jan 10 2017 10:24:22 GMT-0700 (MST)";
+        var APP_BUILD_DATE = "Wed Jan 11 2017 13:42:50 GMT-0700 (MST)";
         var BUILDER = "kcorkan";
-        var CHECKSUM = 20875101955;
+        var CHECKSUM = 21663115438;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -471,6 +471,10 @@ Ext.define("portfolio-committed-vs-delivered", {
             multiple: true,
             title: 'Choose Portfolio Item(s)',
             selectedRecords: selectedRecords,
+            _isArtifactEditable: function(record) {
+                return true;
+             //   return Rally.environment.getContext().getPermissions().isProjectEditor(record.get('Project'));
+            },
             storeConfig: {
                 filters: [{
                     property: 'Children.ObjectID',
@@ -501,11 +505,7 @@ Ext.define("portfolio-committed-vs-delivered", {
             this.down('#clearPI').setVisible(false);
         }
 
-        this.initiativeHash = {};
-        Ext.Array.each(portfolioItems || [], function(p){
-            this.initiativeHash[p.get('ObjectID')] = {info:  p.getData()};
-        }, this);
-
+        this.selectedPortfolioItems = portfolioItems;
 
         this.saveState();
         this.updateView();
@@ -516,6 +516,14 @@ Ext.define("portfolio-committed-vs-delivered", {
         }
         return this.initiativeHash;
     },
+    initializeInitiativeHash: function(){
+        this.initiativeHash = {};
+        if (this.selectedPortfolioItems && this.selectedPortfolioItems.length > 0){
+            Ext.Array.each(this.selectedPortfolioItems || [], function(p){
+                this.initiativeHash[p.get('ObjectID')] = {info:  p.getData()};
+            }, this);
+        }
+    },
     updateView: function(){
         var commitDate = this.getCommitDate(),
             deliverDate = this.getDeliveredDate(),
@@ -524,8 +532,9 @@ Ext.define("portfolio-committed-vs-delivered", {
         this.logger.log('updateView', commitDate, deliverDate, timeboxScope);
 
         this.getDisplayBox().removeAll();
-        this.initiativeHash = {};
 
+        this.initializeInitiativeHash();
+        this.logger.log('initialized initiative hash', this.getInitiativeHash());
         if (!commitDate || !deliverDate){
             this.showAppMessage(this.DATE_MISSING_MSG);
             return;
