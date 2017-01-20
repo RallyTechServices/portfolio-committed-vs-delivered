@@ -42,17 +42,100 @@ Ext.define("portfolio-committed-vs-delivered", {
             }
         }
 
+        this.initializeWithState();
 
+    },
+
+    fetchSelectedPortfolioItems: function(){
+        var deferred = Ext.create('Deft.Deferred');
+
+        Rally.data.PreferenceManager.load({
+            appID: this.getAppId(),
+            success: function(prefs) {
+                this.logger.log('prefs', prefs);
+                if (prefs && prefs.selectedPortfolioItems){
+                    var selectedPortfolioItems = prefs.selectedPortfolioItems.split(',');
+                    this.fetchSelectedInitiatives(selectedPortfolioItems).then({
+                        success: function(records){
+                            deferred.resolve(records);
+                        }
+                    });
+                } else {
+                    deferred.resolve(null);
+                }
+            },
+            scope: this
+        });
+
+        return deferred;
+    },
+
+    initializeWithState: function(){
+        var state = Ext.state.Manager.get('intiatives', []);
+        this.logger.log('initializeWithState', state);
         this.fetchPortfolioItemTypes().then({
             success: function(types){
                 this.portfolioItemTypePaths = types;
-                this.initializeApp();
-                this.onTimeboxScopeChange();
+                this.selectedPortfolioItems = null;
+
+                this.fetchSelectedPortfolioItems().then({
+                    success: function(records){
+                        this.initializeApp();
+                        this.selectedPortfolioItems = records;
+                        this.updateSelectedInitiativesButton(records);
+                        this.onTimeboxScopeChange();
+                    },
+                    scope: this
+                });
             },
             failure: this.showErrorNotification,
             scope: this
         });
+    },
+    updateSelectedInitiativesButton: function(initiatives){
+        if (initiatives && initiatives.length > 0){
+            this.down('#selectPI').removeCls('secondary');
+            this.down('#selectPI').addCls('primary');
+            this.down('#clearPI').setVisible(true);
+        } else {
+            this.down('#selectPI').removeCls('primary');
+            this.down('#selectPI').addCls('secondary');
+            this.down('#clearPI').setVisible(false);
+        }
+    },
+    fetchSelectedInitiatives: function(initiatives){
+        this.logger.log('fetchSelectedInitiatives', initiatives);
+        var deferred = Ext.create('Deft.Deferred');
 
+        var filters = Ext.Array.map(initiatives, function(i){ return {
+            property: 'ObjectID',
+            value: i
+        }; });
+
+        if (filters.length > 1){
+            filters = Rally.data.wsapi.Filter.or(filters);
+        }
+
+        Ext.create('Rally.data.wsapi.Store', {
+            model: this.portfolioItemTypePaths[this.getTargetPortfolioLevel()],
+            fetch: ['FormattedID','Name','ObjectID'],
+            filters: filters,
+            enablePostGet: true,
+            limit: 'Infinity',
+            context: {project: null }
+        }).load({
+            callback: function(records, operation){
+                if (operation.wasSuccessful()){
+                    deferred.resolve(records);
+                } else {
+                    this.logger.log('Unable to load previously selected intiatives ({0}): {1}', initiatives.join(','),operation.error.errors.join(','));
+                    deferred.resolve([]);
+                }
+            },
+            scope: this
+        });
+
+        return deferred;
     },
     fetchPortfolioStates: function(types){
         this.portfolioItemTypePaths = types;
@@ -230,27 +313,44 @@ Ext.define("portfolio-committed-vs-delivered", {
         }
         return this.portfolioItemTypePaths.length - 1;
     },
-    getState: function(){
-        var state = {};
-        if (this.initiativeHash){
-            state.initiatives = Ext.Object.getKeys(this.initiativeHash);
+    saveSelections: function(){
+        var selected = [];
+        if (this.selectedPortfolioItems && this.selectedPortfolioItems.length > 0) {
+            selected = Ext.Array.map(this.selectedPortfolioItems, function (s) {
+                return s.get('ObjectID');
+            });
+
         }
-        this.logger.log('getState', state);
-        return state;
+
+            Rally.data.PreferenceManager.update({
+                appID: this.getAppId(),
+                settings: {
+                    selectedPortfolioItems: selected
+                },
+                success: function (updatedRecords, notUpdatedRecords) {
+                    this.logger.log('saveSelections success', updatedRecords, notUpdatedRecords);
+                },
+                scope: this
+            });
     },
-    applyState: function(state){
-        this.logger.log('applyState', state);
-        if (state.hasOwnProperty('initiatives')){
-            this.initiativeHash = {};
-            Ext.Array.each(state.initiatives, function(i){
-                this.initiativeHash[i] = {};
-            }, this);
-        }
-    },
+    //applyState: function(state){
+    //    this.logger.log('applyState', state);
+    //    //if (state.hasOwnProperty('initiatives')){
+    //    //    this.selectedPortfolioItems = [];
+    //    //    Ext.Array.each(state.initiatives, function(i){
+    //    //        this.selectedPortfolioItems.push({});
+    //    //    });
+    //    //    //this.initiativeHash = {};
+    //    //    //Ext.Array.each(state.initiatives, function(i){
+    //    //    //    this.initiativeHash[i] = {};
+    //    //    //}, this);
+    //    //}
+    //},
 
     getSelectedPortfolioItems: function(){
         var ids = Ext.Object.getKeys(this.getInitiativeHash()),
             portfolioItemPath = this.portfolioItemTypePaths[this.getTargetPortfolioLevel()].toLowerCase();
+
         return Ext.Array.map(ids, function(id){ return Ext.String.format('/{0}/{1}', portfolioItemPath, id); });
     },
     selectPortfolioItems: function(){
@@ -286,23 +386,13 @@ Ext.define("portfolio-committed-vs-delivered", {
     updateSelectedPortfolioItems: function(ct, portfolioItems){
         this.logger.log('updateSelectedPortfolioItems', portfolioItems);
 
-        if (ct.itemId === 'clearPI'){
+        if (ct && ct.itemId === 'clearPI'){
             portfolioItems = [];
         }
-
-        if (portfolioItems && portfolioItems.length > 0){
-            this.down('#selectPI').removeCls('secondary');
-            this.down('#selectPI').addCls('primary');
-            this.down('#clearPI').setVisible(true);
-        } else {
-            this.down('#selectPI').removeCls('primary');
-            this.down('#selectPI').addCls('secondary');
-            this.down('#clearPI').setVisible(false);
-        }
-
+        this.updateSelectedInitiativesButton(portfolioItems);
         this.selectedPortfolioItems = portfolioItems;
 
-        this.saveState();
+        this.saveSelections();
         this.updateView();
     },
     getInitiativeHash: function(){
@@ -313,6 +403,7 @@ Ext.define("portfolio-committed-vs-delivered", {
     },
     initializeInitiativeHash: function(){
         this.initiativeHash = {};
+        this.logger.log('initializeInitiveHash', this.selectedPortfolioItems);
         if (this.selectedPortfolioItems && this.selectedPortfolioItems.length > 0){
             Ext.Array.each(this.selectedPortfolioItems || [], function(p){
                 this.initiativeHash[p.get('ObjectID')] = {info:  p.getData()};
@@ -365,7 +456,8 @@ Ext.define("portfolio-committed-vs-delivered", {
             model: 'Release',
             fetch: ['ObjectID','Name'],
             filters: filters,
-            limit: 'Infinity'
+            limit: 'Infinity',
+            context: {project: null}
         }).load({
             callback: this.fetchFeatures,
             scope: this
@@ -425,7 +517,8 @@ Ext.define("portfolio-committed-vs-delivered", {
         Ext.create('Rally.data.lookback.SnapshotStore',{
             fetch: fetch,
             find: find,
-            hydrate: ['State']
+            hydrate: ['State'],
+            limit: 'Infinity'
         }).load({
             callback: function(records, operation, success){
                 if (success){
